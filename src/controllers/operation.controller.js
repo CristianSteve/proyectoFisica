@@ -1,7 +1,10 @@
+const Operations = require("../class/Operations");
+
 operationsProyect = {};
 
 operationsProyect.findMethod = async (req, res) => {
-	const { operationType } = req.body;
+	const { operationType, values } = req.body;
+	console.log(req.body);
 
 	if (!operationType) {
 		res.status(409).json({
@@ -10,15 +13,15 @@ operationsProyect.findMethod = async (req, res) => {
 		});
 	} else {
 		let response = 0;
-		if (operationType == "tiempo") response = await findWeather(req);
-		if (operationType == "vfinal") response = await findVFinal(req);
-		res.json({ message: { operacion: response } });
+		if (operationType == "tiempo") response = await findWeather(values);
+		if (operationType == "vfinal") response = await findVFinal(values);
+		res.json({ message: { operationType, calulate: response } });
 	}
 };
 
 findVFinal = async (req) => {
-	const { initialVelocity, acceleration, weather } = req.body;
-	const distancia = await calculateDistance(
+	const { initialVelocity, acceleration, weather } = req;
+	const distancia = await Operations.calculateDistance(
 		initialVelocity,
 		weather,
 		acceleration
@@ -30,14 +33,14 @@ findVFinal = async (req) => {
 };
 
 findWeather = async (req) => {
-	const { initialVelocity, finalSpeed, acceleration } = req.body;
-	const tiempo = await calculateTime(
+	const { initialVelocity, finalSpeed, acceleration } = req;
+	const tiempo = await Operations.calculateTime(
 		initialVelocity,
 		finalSpeed,
 		acceleration
 	);
 
-	const distancia = await calculateDistance(
+	const distancia = await Operations.calculateDistance(
 		initialVelocity,
 		tiempo,
 		acceleration
@@ -45,24 +48,5 @@ findWeather = async (req) => {
 
 	return { tiempo: tiempo, distancia: distancia };
 };
-
-calculateTime = async (initialVelocity, finalSpeed, acceleration) =>
-	(finalSpeed - initialVelocity) / acceleration;
-
-calculateDistance = async (initialVelocity, tiempo, acceleration) =>
-	initialVelocity * tiempo + (1 / 2) * acceleration * Math.pow(tiempo, 2);
-
-calculateAccelerationFS = async (initialVelocity, finalSpeed, distance) =>
-	((finalSpeed * finalSpeed - initialVelocity * initialVelocity) / 2) *
-	distance;
-
-calculateVFinal = async (initialVelocity, acceleration, distance) =>
-	Math.pow(initialVelocity + 2 * acceleration * distance, 1 / 2);
-
-calculateVFinal = async (initialVelocity, acceleration, weather) =>
-	Math.pow(initialVelocity + acceleration * weather);
-
-calculateAccelerationIV = async (initialVelocity, weather, distance) =>
-	(distance - initialVelocity * weather) / (0, 5 * Math.pow(weather, 2));
 
 module.exports = operationsProyect;
