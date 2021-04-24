@@ -50,6 +50,19 @@ calculateTime = async (initialVelocity, finalSpeed, acceleration) =>
 	(finalSpeed - initialVelocity) / acceleration;
 
 calculateDistance = async (initialVelocity, tiempo, acceleration) =>
-	initialVelocity * tiempo + (1 / 2) * acceleration * (tiempo * tiempo);
+	initialVelocity * tiempo + (1 / 2) * acceleration * Math.pow(tiempo, 2);
+
+calculateAccelerationFS = async (initialVelocity, finalSpeed, distance) =>
+	((finalSpeed * finalSpeed - initialVelocity * initialVelocity) / 2) *
+	distance;
+
+calculateVFinal = async (initialVelocity, acceleration, distance) =>
+	Math.pow(initialVelocity + 2 * acceleration * distance, 1 / 2);
+
+calculateVFinal = async (initialVelocity, acceleration, weather) =>
+	Math.pow(initialVelocity + acceleration * weather);
+
+calculateAccelerationIV = async (initialVelocity, weather, distance) =>
+	(distance - initialVelocity * weather) / (0, 5 * Math.pow(weather, 2));
 
 module.exports = operationsProyect;
