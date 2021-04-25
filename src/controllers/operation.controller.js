@@ -5,7 +5,6 @@ operationsProyect = {};
 operationsProyect.findMethod = async (req, res) => {
 	const { operationType, values } = req.body;
 	console.log(req.body);
-
 	if (!operationType) {
 		res.status(409).json({
 			//	message: "Parametros obligatorios no informados",
@@ -13,9 +12,9 @@ operationsProyect.findMethod = async (req, res) => {
 		});
 	} else {
 		let response = 0;
-		if (operationType == "tiempo") response = await findWeather(values);
+		if (operationType == "1") response = await findWeather(values);
 		if (operationType == "vfinal") response = await findVFinal(values);
-		res.json({ message: { operationType, calulate: response } });
+		res.json({ message: { operationType, calculate: response } });
 	}
 };
 
