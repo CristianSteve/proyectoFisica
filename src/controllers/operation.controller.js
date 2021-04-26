@@ -4,7 +4,6 @@ operationsProyect = {};
 
 operationsProyect.findMethod = async (req, res) => {
 	const { operationType, values } = req.body;
-	console.log(req.body);
 	if (!operationType) {
 		res.status(409).json({
 			message: "Tipo de operacion no informado",
@@ -14,7 +13,10 @@ operationsProyect.findMethod = async (req, res) => {
 		if (operationType == "1") response = await findOne(values);
 		if (operationType == "2") response = await findTwo(values);
 		if (operationType == "3") response = await findTree(values);
-		if (operationType == "4") response = await findWeather(values);
+		if (operationType == "4") response = await findFour(values);
+		if (operationType == "5") response = await findFive(values);
+		if (operationType == "6") response = await findSix(values);
+		if (operationType == "7") response = await findSeven(values);
 		if (operationType == "vfinal") response = await findVFinal(values);
 		res.json({ message: { operationType, calculate: response } });
 	}
@@ -22,28 +24,27 @@ operationsProyect.findMethod = async (req, res) => {
 
 findOne = async (req) => {
 	const { distance, initialVelocity, finalSpeed } = req;
-	const aceleracion = await Operations.calculateAccelerationFS(
+	const [aceleracion, ecuacion] = await Operations.calculateAccelerationFS(
 		initialVelocity,
 		finalSpeed,
 		distance
 	);
-	console.log(aceleracion);
-	const tiempo = await Operations.calculateTime(
+	const [tiempo, ecuacion1] = await Operations.calculateTime(
 		initialVelocity,
 		finalSpeed,
-		aceleracion[0]
+		aceleracion
 	);
 	return [
 		{
 			id: "Aceleracion",
-			value: aceleracion[0],
-			ecuacion: aceleracion[1],
+			value: aceleracion,
+			ecuacion: ecuacion,
 			unidad: "\\frac{m}{S^2}",
 		},
 		{
 			id: "Tiempo",
 			value: tiempo,
-			ecuacion: "t=\\frac{v_f - v_0}{2⋅d} = ",
+			ecuacion: ecuacion1,
 			unidad: "sg",
 		},
 	];
@@ -52,12 +53,12 @@ findOne = async (req) => {
 findTwo = async (req) => {
 	const { initialVelocity, finalSpeed, acceleration } = req;
 
-	const tiempo = await Operations.calculateTime(
+	const [tiempo, ecuacion] = await Operations.calculateTime(
 		initialVelocity,
 		finalSpeed,
 		acceleration
 	);
-	const distancia = await Operations.calculateDistance(
+	const [distancia, ecuacion1] = await Operations.calculateDistance(
 		initialVelocity,
 		tiempo,
 		acceleration
@@ -66,13 +67,13 @@ findTwo = async (req) => {
 		{
 			id: "Distancia",
 			value: distancia,
-			ecuacion: "d = v_0 ⋅ t + \\frac{1} {2} ⋅ a ⋅ t^2=",
+			ecuacion: ecuacion1,
 			unidad: "m",
 		},
 		{
 			id: "Tiempo",
 			value: tiempo,
-			ecuacion: "t = \\frac{v_f - v_0}{2⋅d}=",
+			ecuacion: ecuacion,
 			unidad: "sg",
 		},
 	];
@@ -81,13 +82,12 @@ findTwo = async (req) => {
 findTree = async (req) => {
 	const { initialVelocity, finalSpeed, weather } = req;
 
-	const acceleration = await Operations.calculateAccelerationT(
+	const [acceleration, ecuacion] = await Operations.calculateAccelerationT(
 		initialVelocity,
 		finalSpeed,
 		weather
 	);
-	console.log(finalSpeed - initialVelocity, weather);
-	const distancia = await Operations.calculateDistance(
+	const [distancia, ecuacion1] = await Operations.calculateDistance(
 		initialVelocity,
 		weather,
 		acceleration
@@ -96,14 +96,133 @@ findTree = async (req) => {
 		{
 			id: "Distancia",
 			value: distancia,
-			ecuacion: "d = v_0 ⋅ t + \\frac{1} {2} ⋅ a ⋅ t^2=",
+			ecuacion: ecuacion1,
 			unidad: "m",
 		},
 		{
 			id: "Aceleracion",
 			value: acceleration,
-			ecuacion: "a = \\frac{v_f - v_0}{t}=",
+			ecuacion: ecuacion,
 			unidad: "\\frac{m}{s^2}",
+		},
+	];
+};
+
+findFour = async (req) => {
+	const { distance, initialVelocity, acceleration } = req;
+
+	const [finalSpeed, ecuacion] = await Operations.calculateVFinalWithDistance(
+		initialVelocity,
+		acceleration,
+		distance
+	);
+	const [tiempo, ecuacion1] = await Operations.calculateTime(
+		initialVelocity,
+		finalSpeed,
+		acceleration
+	);
+	return [
+		{
+			id: "Velocidad Final",
+			value: finalSpeed,
+			ecuacion: ecuacion,
+			unidad: "\\frac{m}{s^2}",
+		},
+		{
+			id: "Tiempo",
+			value: tiempo,
+			ecuacion: ecuacion1,
+			unidad: "\\frac{m}{s^2}",
+		},
+	];
+};
+
+findFive = async (req) => {
+	const { distance, initialVelocity, weather } = req;
+
+	const [finalSpeed, ecuacion] = await Operations.calculateVFinalWithDTV(
+		distance,
+		weather,
+		initialVelocity
+	);
+	const [acceleration, ecuacion1] = await Operations.calculateAccelerationT(
+		initialVelocity,
+		finalSpeed,
+		weather
+	);
+	return [
+		{
+			id: "Aceleracion",
+			value: acceleration,
+			ecuacion: ecuacion1,
+			unidad: "\\frac{m}{s^2}",
+		},
+		{
+			id: "Velocidad Final",
+			value: finalSpeed,
+			ecuacion: ecuacion,
+			unidad: "\\frac{m}{s}",
+		},
+	];
+};
+
+findSix = async (req) => {
+	const { distance, finalSpeed, acceleration } = req;
+
+	const [
+		initialVelocity,
+		ecuacion,
+	] = await Operations.calculateVInitialWithDistance(
+		finalSpeed,
+		acceleration,
+		distance
+	);
+	const [tiempo, ecuacion1] = await Operations.calculateTime(
+		initialVelocity,
+		finalSpeed,
+		acceleration
+	);
+	return [
+		{
+			id: "Velocidad Inicial",
+			value: initialVelocity,
+			ecuacion: ecuacion,
+			unidad: "\\frac{m}{s}",
+		},
+		{
+			id: "Tiempo",
+			value: tiempo,
+			ecuacion: ecuacion1,
+			unidad: "sg",
+		},
+	];
+};
+
+findSeven = async (req) => {
+	const { distance, finalSpeed, weather } = req;
+
+	const [
+		initialVelocity,
+		ecuacion,
+	] = await Operations.calculateVInitialWithDTV(distance, weather, finalSpeed);
+
+	const [tiempo, ecuacion1] = await Operations.calculateAccelerationT(
+		initialVelocity,
+		finalSpeed,
+		weather
+	);
+	return [
+		{
+			id: "Velocidad Inicial",
+			value: initialVelocity,
+			ecuacion: ecuacion,
+			unidad: "\\frac{m}{s}",
+		},
+		{
+			id: "Tiempo",
+			value: tiempo,
+			ecuacion: ecuacion1,
+			unidad: "sg",
 		},
 	];
 };
